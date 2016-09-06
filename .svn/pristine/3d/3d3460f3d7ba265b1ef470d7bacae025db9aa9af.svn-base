@@ -1,0 +1,15 @@
+package cn.bronzeware.muppet.core;
+
+import cn.bronzeware.muppet.datasource.DataSourceUtil;
+
+public class StandardXMLConfig extends AbstractConfig implements XMLConfig{
+
+	private StandardDataSourceXMLConfig config;
+	
+	public StandardXMLConfig(String xmlPath) {
+		super(xmlPath);
+		config = new StandardDataSourceXMLConfig(getXMLConfigResource());
+		DataSourceResource dataSourceResource = config.getDataSourceInfo();
+		new DataSourceUtil(dataSourceResource.getProp());
+	}
+}

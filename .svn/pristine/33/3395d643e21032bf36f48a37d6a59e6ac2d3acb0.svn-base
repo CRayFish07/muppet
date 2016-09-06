@@ -1,0 +1,62 @@
+package cn.bronzeware.muppet.filters;
+
+class TaskFilter implements Runnable{
+	public  TaskFilter(Chain chain) {
+		this.chain = chain;
+	}
+	private Chain chain;
+	@Override
+	public void run() {
+		chain.doChain();
+	}
+}
+
+class TaskAddFilter implements Runnable{
+	public  TaskAddFilter(Chain chain,Filter[] filter) {
+		this.chain = chain;
+		this.filters = filter;
+	}
+	private Filter[] filters;
+	private Chain chain;
+	@Override
+	public void run() {
+		chain.addFilters(filters);
+	}
+}
+
+public class TestChain {
+	
+	
+
+	public static void main(String[] args){
+		final Chain chain = new Chain();
+		Filter[] filters = new Filter[]{new Filter1(),new Filter2()
+				,new Filter1()
+				,new Filter1(),new Filter2()
+				,new Filter1()};
+		chain.addFilters(filters);
+		Thread thread = new Thread(new TaskFilter(chain));
+		thread.start();
+	
+		Thread thread1 = new Thread(new TaskAddFilter(chain,filters));
+		thread1.start();
+		
+	
+	
+		Thread thread3 = new Thread(new TaskFilter(chain));
+		thread3.start();
+		
+		Thread thread2 = new Thread(new TaskAddFilter(chain,filters));
+		thread2.start();
+		Thread thread4 = new Thread(new TaskFilter(chain));
+		thread4.start();
+
+		Thread thread5 = new Thread(new TaskAddFilter(chain,filters));
+		thread5.start();
+		Thread thread6 = new Thread(new TaskFilter(chain));
+		thread6.start();
+	
+		Thread thread7 = new Thread(new TaskFilter(chain));
+		thread7.start();
+	}
+}

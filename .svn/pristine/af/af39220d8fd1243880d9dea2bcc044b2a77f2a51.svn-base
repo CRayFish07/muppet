@@ -1,0 +1,46 @@
+package cn.bronzeware.muppet.util.log;
+
+import java.util.Date;
+
+import javax.xml.crypto.Data;
+
+public class Logger {
+
+	public static boolean isStart = true;
+	
+	private static void print(){
+		System.out.print("info:"+
+				new Date(System.currentTimeMillis()).toLocaleString()
+				+"   ");
+	}
+	
+	public static void print(String message){
+		if(isStart){
+			print();
+			System.out.print(message);
+		}
+	}
+	
+	public static void println(String message){
+		if(isStart){
+			print();
+			System.out.println(message);
+		}
+	}
+	
+	public static void println(int message){
+		
+		if(isStart){
+			print();
+			println(String.valueOf(message));
+		}
+	}
+	
+	public void print(int message){
+		if(isStart){
+			print();
+			print(String.valueOf(message));
+		}
+	}
+	
+}

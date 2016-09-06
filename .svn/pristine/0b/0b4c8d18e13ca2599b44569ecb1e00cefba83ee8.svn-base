@@ -1,0 +1,153 @@
+package cn.bronzeware.muppet.Annotation;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+
+public class TableAnnoExecutor{
+
+	private static Map<Class<?>,RecordInfo> factory 
+		= new HashMap<Class<?>,RecordInfo>();
+	
+	
+	
+	/**
+	 * 负责解析class的注解，包括{@link PrimaryKey } ,{@link Table}
+	 * ,{@link NotInTable}
+	 * 由于clazz.getDeclaredFields方法较为费时，实体类class在运行时一般不会<br>
+	 * 改变，所以采用 缓存技术，将Field缓存起来，这样每一次对class的解析，相当于仅仅<br>
+	 * 是通过Field对象获取相应的Value，这样在速度上会有不小的提升
+	 */
+	public static RecordInfo execute(Object object)
+	throws AnnotationException
+	{
+		try {
+			Class<?> clazz = object.getClass();
+			RecordInfo info = null;
+			//获取时锁定map
+			synchronized (factory) {
+				if(factory.containsKey(clazz)){
+					
+					info = factory.get(clazz);
+					
+				}
+			}
+			
+			//如果可以获取到，那么则获取info，对象，同时获取到Field的map
+			if(info!=null){
+				Map<Field, Object> map = info.getMap();
+				Map<Field, Object> newmap = new LinkedHashMap<Field, Object>(map.size());
+				for(Entry<Field,Object> e:map.entrySet()){
+					Object value = e.getKey().get(object);
+					newmap.put(e.getKey(), value);
+				}
+				info.setMap(newmap);
+				return info;
+			}
+			
+			
+			//如果没有获取到Info，说明是第一次 解析
+			
+			info = new RecordInfo();
+			
+			
+			/**
+			 * 存储Field域和value,这个键值对的插入顺序应该是有序的，
+			 * 这样在构造sql语句，以及预编译sql语句时，构造参数时都需要
+			 * 有序的map
+			 */
+			Map<Field, Object> map = 
+					new LinkedHashMap<Field, Object>();
+			
+			
+			
+			Annotation[] annotation = clazz.getDeclaredAnnotations();
+			
+			/*
+			 * 是否有主键，分两种情况，一种情况是，Class中有且仅有一个
+			 * {@link PrimaryKey} 标记，这是这个域将被保存在 PrimaryKeyField这个
+			 * 域中，或者没有PrimaryKey标记，但是有一个域的 name是 'id'在这种情况下，会默认
+			 * 这个域作为主键
+			 */
+			boolean is_have_primarykey = false;
+			if(annotation==null){
+				throw new LackAnnotationException("至少应该包括一种注解，例如Table注解");
+			}
+			
+			
+			for (int i = 0; i < annotation.length; i++) {
+				Class<? extends Annotation> type = annotation[i].annotationType();
+				
+				if(type.equals(Table.class)){
+					Table table = clazz.getAnnotation(Table.class);
+					String tableName = table.tablename();
+					if(tableName==null){
+						tableName = clazz.getSimpleName();
+					}
+					info.setTableName(tableName);
+					
+					Field[] fields = clazz.getDeclaredFields();
+					Field default_primary_key_field = null;
+					
+					for(Field field:fields){
+						NotInTable notInTable = field.getAnnotation(NotInTable.class);
+						//也就是说在在数据库表里
+						if(notInTable==null){
+							field.setAccessible(true);
+							
+							//System.out.println(field.getName()+" "+field.get(object));
+							Object value = field.get(object);
+							
+							map.put(field,value);
+						}
+						if(field.getName().equals(Constant.PRIMARY_KEY)){
+							default_primary_key_field = field;
+						}
+						
+						PrimaryKey primaryKey =  field.getAnnotation(PrimaryKey.class);
+						if(primaryKey!=null){
+							//说明此时 已经出现过一个主键了，应该报错
+							if(is_have_primarykey==true){
+								throw new MutiPrimaryKeyException("请保证一个实体类一个PrimaryKey注解定义");
+							}else{
+								info.setPrimarykey(field);
+								is_have_primarykey = true;
+							}
+							
+						}
+					}
+					if(is_have_primarykey==false&&default_primary_key_field==null){
+						throw new LackPrimaryKeyException();
+					}
+					if(is_have_primarykey==false&&default_primary_key_field!=null){
+						info.setPrimarykey(default_primary_key_field);
+					}
+					
+					
+					info.setMap(map);
+				}
+			}
+			factory.put(clazz, info);
+			return info;
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// 
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// 
+			e.printStackTrace();
+		}
+		return null;
+		
+		
+	}
+	public static void main(String[] args) {
+
+	}
+
+}

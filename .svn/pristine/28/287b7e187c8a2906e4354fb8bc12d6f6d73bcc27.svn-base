@@ -1,0 +1,33 @@
+package cn.bronzeware.util.reflect;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+
+import net.sf.cglib.proxy.MethodProxy;
+
+class StandardBindInvocationHandler extends DefaultBindInvocationHandler{
+
+	private InvocationHandler handler;
+	public StandardBindInvocationHandler(InvocationHandler handler){
+		this.handler = handler;
+	}
+
+	
+	public Object invoke(Object proxy, Method method, Object[] args)
+			throws Throwable {
+		return handler.invoke(target, method, args);
+	}
+
+	@Override
+	public Object intercept(Object proxy, Method method, Object[] params,
+			MethodProxy methodProxy) throws Throwable {
+		
+		Object object = handler.invoke(target, method, params);
+		return object;
+	}
+	
+	
+	
+	
+	
+}

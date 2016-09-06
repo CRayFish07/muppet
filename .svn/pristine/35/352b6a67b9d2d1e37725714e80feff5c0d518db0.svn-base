@@ -1,0 +1,119 @@
+package cn.bronzeware.util.reflect;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+import cn.bronzeware.muppet.util.log.Logger;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+
+class DefaultBindInvocationHandler implements BindInvocationHandler
+,MethodInterceptor{
+
+	private InvocationHandler handler = null;
+	public DefaultBindInvocationHandler(InvocationHandler handler){
+		this.handler = handler;
+	}
+	
+	public DefaultBindInvocationHandler(){
+		
+	}
+	
+	public <T> T getClassProxy(T target){
+		this.target = target;
+		return  (T) createProxy(target.getClass());
+	}
+	
+	protected Object target;
+	
+	@Override
+	public Object bind(Object target)
+			throws NullPointerException,IllegalArgumentException
+	{
+		this.target = (target);
+		if(isHaveInterface(target)){
+			return Proxy.newProxyInstance(target.getClass().getClassLoader()
+					, target.getClass().getInterfaces(), this);	
+		}
+		else{
+			return createProxy(target.getClass());
+		}
+		
+	}
+	
+	private boolean isHaveInterface(Object target){
+		if(target.getClass().getInterfaces()!=null
+				&&target.getClass().getInterfaces().length>0){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	@Override
+	public <T> T bind(Object target,Class<T> targetInterface)
+			throws NullPointerException,IllegalArgumentException{
+		this.target = (target);
+		if(isHaveInterface(target)){
+			
+			if(targetInterface.isInstance(target)){
+				Object object = Proxy.newProxyInstance(target.getClass().getClassLoader()
+						, new Class[]{targetInterface}
+						,this.handler==null?this:this.handler);
+				
+				return (T)object;
+			}else{
+				throw new IllegalArgumentException(target.getClass().getName()
+						+"没有实现"+targetInterface.getName());
+			}
+			
+		}else
+		{
+			return (T) createProxy(target.getClass());
+		}
+	}
+
+	public <T> T createProxy(Class<T> targetClass) {  
+	       
+	        Enhancer enhancer = new Enhancer();  
+	        enhancer.setSuperclass(targetClass);// 设置代理目标  
+	        enhancer.setCallback(this);// 设置回调  
+	        enhancer.setClassLoader(targetClass.getClassLoader());
+	         
+	        return (T)enhancer.create();
+	    }  
+	
+	
+	@Override
+	public Object invoke(Object proxy, Method method, Object[] args)
+			throws Throwable {
+		before(proxy,method,args,null);
+		Object result = method.invoke(target, args);
+		after(proxy,method,args,null);
+		return result;
+	}
+
+	@Override
+	public Object intercept(Object proxy, Method method, Object[] params,  
+            MethodProxy methodProxy) throws Throwable {
+		
+		before(proxy,method,params,methodProxy);
+		Object  result = methodProxy.invokeSuper(proxy, params);
+		after(proxy,method,params,methodProxy);
+		return result;
+	}
+	
+	protected Object before(Object proxy, Method method, Object[] args,MethodProxy methodProxy) {
+		//Logger.println("dayin before "+method.getName());
+		return null;
+	}
+	
+	protected Object after(Object proxy, Method method, Object[] args,MethodProxy methodProxy){
+		return null;
+	}
+		
+}

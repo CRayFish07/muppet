@@ -1,0 +1,190 @@
+﻿
+muppet使用帮助
+
+
+1.增删查改 如何使用
+ 1.1 增加操作
+		Muppet muppet = new Muppet();//创建muppet
+		
+		//这段代码创建了一个要插入的对象
+		Note note = new Note();
+		note.setPassword("");
+		note.setUsername("海强");
+		note.setUser_id(34);
+		note.setValue("jing");
+		
+		//执行插入操作，success返回结果，成功返回true,失败返回false;
+		Boolean success = muppet.insert(note);
+
+   1.2 按主键删除
+			Muppet muppet = new Muppet();
+			Note note = new Note();
+			note.setPassword("");
+			note.setUsername("海强");
+			note.setUser_id(34);
+			note.setValue("jing");
+			note.setId(3416);
+			
+			Boolean success = muppet.deleteByPrimaryKey(note);
+	1.3 按查询条件删除
+			Muppet muppet = new Muppet();
+			Note note = new Note();
+			
+			String wheres = " id > ? and id < ?";
+			
+			Boolean success = muppet.delete(note,wheres,new Object[]{3300,3305});
+			在这里查询条件可以很复杂，但是目前仅仅支持单表的删除（我做项目删除功能基本没有跨表，但总之之后会尽力加上这个功能）
+	1.4 按主键更新
+			Muppet muppet = new Muppet();
+			Note note = new Note();
+			note.setPassword("");
+			note.setUsername("muppet的中文名是大眼蛙");
+			note.setUser_id(34);
+			note.setValue("萌萌哒");
+			note.setId(3340);
+			
+			//只更新3340这条记录
+			Boolean success = muppet.updateByPrimaryKey(note);
+	
+	1.5 按条件更新
+	    Muppet muppet = new Muppet();
+		Note note = new Note();
+		note.setPassword("");
+		note.setUsername("muppet的中文名是大眼蛙");
+		note.setUser_id(34);
+		note.setValue("萌萌哒");
+		
+		String wheres = " id > ? and id < ?";
+		
+		//把id 范围在 3305，到 3310 中的值改为 note对象中的值
+		Boolean success = muppet.update(note,wheres,new Object[]{3305,3310});
+		
+	1.6 单表查询
+	   不可避免我们需要单表查询
+	   例如 查询id在某个区间的人 select * from t_user where id > ? and id < ?
+	   这样可以查询所有在这区间的记录  我们需要获得一个List集合
+	   我们可以这样做
+	   
+		Muppet muppet = new Muppet();
+		Note note = new Note();
+		String wheres = " id > ? and id < ?";
+		
+		List list = muppet.query(note, wheres, new Object[]{3340,3350});
+		for (Iterator iterator = list.iterator();iterator.hasNext();) {
+			Note resultNote = (Note) iterator.next();
+			System.out.println(resultNote.getUsername());
+		}
+	1.7 跨表查询
+		当然大家的数据库如果冗余度低，或者业务逻辑比较复杂，我们就需要
+		跨表，跨表查询 的sql语句，就需要 用户自己手动编写了
+		然后传给我们 相应位置的值，我们能做的只是把返回结果映射到对象
+		之中
+		
+		Muppet muppet = new Muppet();
+		Note note = new Note();
+		String  queryString = "select u.id as user_id" +
+				",u.username as username,u.password as password ,n.value,u.id" +
+				" from t_user u,t_note n where u.id != n.user_id";
+		
+		List list = muppet.query(queryString, new Object[]{}, Note.class);
+		for (Iterator iterator = list.iterator();iterator.hasNext();) {
+			Note resultNote = (Note) iterator.next();
+			System.out.println(resultNote);
+		}
+		
+		可以看到这里面 有as 关键词 作用是 避免两个表中出现相同名字，无法映射到对象中，这个对象也就是
+		Note类的实例 ，这个类中有 select中所有要查询的属性，当缺少属性时，会报错
+		java.lang.NoSuchFieldException: XXXX相应属性名称当然你应该避免这种情况
+		
+		
+
+2.你在此之前应该做的事情
+	2,1 配置数据源
+			在执行数据操作之前，当然你最起码得告诉我数据库url，username,password吧，这些是必须的
+			否则我就按照默认的localhost,root,root了,最好不要用默认的
+			而且如果想提升性能必须使用数据源，使用数据源同样提供一些参数（这些参数不是必需的）
+			initialPoolSize 数据库连接池初始大小
+			
+			autocommit 是否自动提交事务
+			
+			 maxactive 数据库最大连接数
+			
+			maxidle  最大空闲时间
+			
+			minidle 最小空闲时间
+			
+			maxwait 最大等待时间
+			
+			这些数据通通以这种方式告诉我
+			Properties properties = new Properties();
+				properties.setProperty("url",
+						"jdbc:mysql://localhost:3306/test?Unicode=true&characterEncoding=utf-8");
+				properties.setProperty("username", "root");
+				properties.setProperty("password", "root");
+				Muppet.initial(properties);
+				通过java.util包下的Properties类告诉我你的配置是什么
+			然后把配置文件给Muppet的initial方法，这段代码只需要加载一遍即可，你可以放在
+			web项目的监听器了，或者通过一个类把这段代码封装起来，再或者，你可以修改
+			cn.bronzeware.muppet.datasource.DataSourceUtil类的代码，这样就闭上两种方式方便多了
+	2.2 配置实体类
+	    muppet框架是对象关系映射，你需要告诉我实体类对应的数据表是什么
+		每个实体类的字段对应的数据表的字段是什么
+		同样主键什么
+		
+		以user类来说
+			@Table(tablename="t_user")   //Table标签标记当前实体类对应哪个表
+			public class User {
+
+				private String username;
+				private String password;
+				
+				@PrimaryKey()         //标记当前主键
+				private int id;
+				private Date date;
+				public String getUsername() {
+					return username;
+				}
+				public void setUsername(String username) {
+					this.username = username;
+				}
+				public String getPassword() {
+					return password;
+				}
+				public void setPassword(String password) {
+					this.password = password;
+				}
+				public int getId() {
+					return id;
+				}
+				public void setId(int id) {
+					this.id = id;
+				}
+				public Date getDate() {
+					return date;
+				}
+				public void setDate(Date date) {
+					this.date = date;
+				}
+				@Override
+				public String toString() {
+					return "User [username=" + username + ", password=" + password
+							+ ", id=" + id + ", date=" + date + "]";
+				}
+			}
+			
+			在这里我们默认了很多
+			1.每个字段与数据库字段名称对应
+			2.如果没有通过@PrimaryKey 注解声明 主键，默认name为id的属性为主键
+			3.如果在实体类中你想多添加一些字段，但是这些字段没在数据表中
+			你应该通过@NotInTable 声明，否则在插入，更新时会报错
+		
+		
+		
+	3. 不足
+		1.用户接口仍然不是很方便，例如 查询操作，为什么还要通过对象作为入参，通过Class类就可以
+		2.目前不支持事务操作
+		3.属性域和数据表字段没有映射功能
+		4.没有配置文件接口
+		5.没有你的加入是我们队伍最大的遗憾
+		
+		

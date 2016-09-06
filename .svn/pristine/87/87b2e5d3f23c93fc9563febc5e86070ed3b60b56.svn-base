@@ -1,0 +1,31 @@
+package cn.bronzeware.muppet.test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public interface Outer {
+
+	int outer();
+	
+	interface Inner{
+		int innnr();
+	}
+}
+class OuterImplement implements Outer{
+	
+
+	@Override
+	public int outer() {
+		
+		return 0;
+	}
+	public static void main(String[] args){
+		
+		OuterImplement outer = new OuterImplement();
+		outer.outer();
+		
+		//StaticClass.Inner inner =  new StaticClass.Inner();
+		//Map.Entry<String, String> entry = new HashMap.Entry<String,String>();
+		//Outer.Inner
+	}
+}

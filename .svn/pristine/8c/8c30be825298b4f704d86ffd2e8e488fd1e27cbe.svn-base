@@ -1,0 +1,6 @@
+package cn.bronzeware.muppet.listener;
+
+public interface Listener {
+
+	public void event(EventType type,Event event);
+}

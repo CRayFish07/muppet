@@ -1,0 +1,14 @@
+package cn.bronzeware.muppet.filters;
+
+public class Filter3 implements Filter{
+
+	@Override
+	public void doFilter(Chain chain) {
+		System.out.println(Thread.currentThread().getName()+"c");
+		chain.doNext();
+		System.out.println(Thread.currentThread().getName()+"x");
+		
+	}
+	
+
+}

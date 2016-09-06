@@ -1,0 +1,46 @@
+package cn.bronzeware.muppet.context;
+
+import javax.swing.text.AbstractDocument.BranchElement;
+
+import cn.bronzeware.muppet.core.ResourceContext;
+import cn.bronzeware.muppet.resource.Container;
+import cn.bronzeware.muppet.resource.ResourceInfo;
+import cn.bronzeware.muppet.util.log.Logger;
+
+public class ContextFactory {
+
+	
+	private ResourceContext context;
+	private  Container<String, ResourceInfo> container;
+	private SelectContext selectContext;
+	private UpdateContext updateContext;
+	private InsertContext insertContext;
+	private DeleteContext deleteContext;
+	
+	public ContextFactory(ResourceContext context){
+		this.context = context;
+		this.container = context.getContainer();
+		
+		selectContext = new SelectContext(container);
+		updateContext = new UpdateContext(container);
+		insertContext = new InsertContext(container);
+		deleteContext = new DeleteContext(container);
+	}
+	
+	
+	
+	public Context getContext(Context.TYPE type){
+		switch(type){
+		case DELETE_CONTEXT:
+			return deleteContext;
+		case SELECT_CONTEXT:
+			return selectContext;
+		case UPDATE_CONTEXT:
+			return updateContext;
+		case INSERT_CONTEXT:
+			return insertContext;
+		}
+		return null;
+	}
+	
+}

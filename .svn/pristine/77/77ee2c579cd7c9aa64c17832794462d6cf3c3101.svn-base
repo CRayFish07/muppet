@@ -1,0 +1,29 @@
+package cn.bronzeware.muppet.listener;
+
+
+
+public class Creater implements Listened{
+
+	private Listeners listeners = new Listeners();
+
+	@Override
+	public void addListener(EventType type, Listener listener) {
+		listeners.addListener(type, listener);
+	}
+	
+	public void  test1(){
+		
+		listeners.event(EventType.PRE_EXECUTE, new Event());
+	}
+	
+	public static void main(String[] args){
+		Creater creater = new Creater();
+		Listener listener1 = new Listener1();
+		creater.addListener(EventType.PRE_EXECUTE, listener1);
+		creater.addListener(EventType.PRE_EXECUTE, listener1);
+		creater.addListener(EventType.PRE_EXECUTE, listener1);
+		creater.test1();
+	}
+	
+
+}

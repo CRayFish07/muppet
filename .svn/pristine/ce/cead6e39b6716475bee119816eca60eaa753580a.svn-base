@@ -1,0 +1,7 @@
+package cn.bronzeware.muppet.listener;
+
+public enum EventType {
+
+	PRE_EXECUTE,
+	POST_EXECUTE
+}

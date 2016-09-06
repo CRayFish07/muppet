@@ -1,0 +1,21 @@
+
+1.5版本
+1.监听器 90%  
+	监听器实现内部的解耦
+	过滤器  30%
+	过滤器实现调用方对数据库操作的灵活操作
+2.事务控制  0%
+	实现安全
+3.内部AOP   完成70%
+	实现内部的解耦
+4.视图支持.分表实现 0%
+	常用功能实现
+	分表之后的分页，查询如何提供默认实现
+	http://blog.csdn.net/cxzhq2002/article/details/49279199
+	http://www.blogjava.net/weishuangshuang/archive/2011/03/26/347080.html
+	http://blog.csdn.net/hhq163/article/details/6219221
+	http://blog.csdn.net/column/details/sharding.html
+ 5：实现数据表自动生成实体类工具开发   （完成80%）
+ 
+ 1.6版本
+ 内部IOC

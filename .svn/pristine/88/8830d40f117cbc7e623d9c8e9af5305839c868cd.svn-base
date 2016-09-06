@@ -1,0 +1,180 @@
+package cn.bronzeware.muppet;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+
+import cn.bronzeware.muppet.context.ContextException;
+import cn.bronzeware.muppet.context.ContextFactory;
+import cn.bronzeware.muppet.context.DeleteContext;
+import cn.bronzeware.muppet.context.InsertContext;
+import cn.bronzeware.muppet.context.SelectContext;
+import cn.bronzeware.muppet.context.SqlGenerateContextException;
+import cn.bronzeware.muppet.context.UpdateContext;
+import cn.bronzeware.muppet.context.Context.TYPE;
+import cn.bronzeware.muppet.core.ResourceContext;
+import cn.bronzeware.muppet.datasource.DataSourceUtil;
+import cn.bronzeware.muppet.entities.Note;
+
+/**
+ * 
+ */
+public class Muppet {
+
+	private static final String Boolean = null;
+	
+	private ResourceContext context ;
+	
+	private ContextFactory contextFactory;
+	
+	private  boolean start = false;
+	public Muppet(String[] configs){
+		context = new ResourceContext(configs[0]);
+		contextFactory = context.getContextFactory();
+		insertContext = (InsertContext) contextFactory.getContext(TYPE.INSERT_CONTEXT);
+		selectContext = (SelectContext) contextFactory.getContext(TYPE.SELECT_CONTEXT);
+		updateContext = (UpdateContext) contextFactory.getContext(TYPE.UPDATE_CONTEXT);
+		deleteContext = (DeleteContext) contextFactory.getContext(TYPE.DELETE_CONTEXT);
+	}
+	private  InsertContext insertContext ;
+	private  SelectContext selectContext ;
+	private  UpdateContext updateContext ;
+	private  DeleteContext deleteContext ;
+	
+	
+	
+	public  void initial(Properties properties){
+		new DataSourceUtil(properties);
+		start = true;
+	}
+	
+	
+	public  boolean update(Object object,String wheres ,Object[] wherevalues){
+		
+		Object success = null;
+		try {
+			success = updateContext.execute(object, wheres, wherevalues);
+		} catch (SqlGenerateContextException e) {
+			// 
+			e.printStackTrace();
+		}
+		
+		return (Boolean)success;
+				
+	}
+	
+	public boolean updateByPrimaryKey(Object object){
+		return (Boolean)updateContext.executeByPrimaryKey(object);
+	}
+	
+	
+	public boolean insert(Object object)
+	{
+		boolean success = false;
+		try {
+			success = (Boolean)insertContext.execute(object, null, null);
+		} catch (ContextException e) {
+			// 
+			e.printStackTrace();
+		}
+		return success;
+	}
+	
+	public boolean delete(Object object,String wheres ,Object[] wherevalues)
+	{
+		Boolean success = false;
+		try {
+			success = (Boolean)deleteContext.execute(object, wheres, wherevalues);
+		} catch (ContextException e) {
+			// 
+			e.printStackTrace();
+		}
+		return success;
+	}
+	
+	public boolean deleteByPrimaryKey(Object object){
+		Boolean success = false;
+		try {
+			success = (Boolean)deleteContext.executeByPrimaryKey(object);
+		} catch (ContextException e) {
+			// 
+			e.printStackTrace();
+		}
+		return success;
+	}
+	/*public boolean delete(int id,Object object){
+		Object object 
+		delete(id, clazz)
+	}*/
+	
+	/**
+	 * 单表查询
+	 */
+	public <T> List<T>  query(Class<T> clazz
+			,String wheres 
+			,Object[] wherevalues){
+		List<T> list = null;
+		try {
+			list = selectContext.execute(clazz, wheres, wherevalues);
+		} catch (ContextException e) {
+			// 
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	/**
+	 * 多表查询
+	 */
+	public <T> List<T>  query(String queryString,Object[] values,Class<T> clazz){
+		List<T> list = selectContext.execute(queryString, values, clazz);
+		return list;
+	}
+	
+	public static void main(String[] args){
+		
+		/*Properties properties = new Properties();
+		properties.setProperty("url",
+				"jdbc:mysql://123.56.225.214:3999/test?Unicode=true&characterEncoding=utf-8");
+		properties.setProperty("username", "root");
+		properties.setProperty("password", "root");
+		Muppet.initial(properties);
+		Muppet muppet = new Muppet();
+		Note note = new Note();
+		note.setPassword("");
+		note.setUsername("muppet的中文名是大眼蛙");
+		//note.setUser_id(34);
+		note.setValue("萌萌哒");
+		
+		Note note1 = new Note();
+		note1.setPassword("");
+		note1.setUsername("mu");
+		//note1.setUser_id(34);
+		note1.setValue("萌萌哒");
+		
+		
+		
+		note.setId(3340);
+		muppet.insert(note);
+		muppet.insert(note1);*/
+		/*note.setPassword("");
+		note.setUsername("muppet的中文名是大眼蛙");
+		note.setUser_id(34);
+		note.setValue("萌萌哒");
+		note.setId(3340);*/
+		/*String  queryString = "select u.id as user_id" +
+				",u.username as username,u.password as password ,n.value,u.id" +
+				" from t_user u,t_note n where u.id != n.user_id";
+		
+		List list = muppet.query(queryString, new Object[]{}, Note.class);
+		for (Iterator iterator = list.iterator();iterator.hasNext();) {
+			Note resultNote = (Note) iterator.next();
+			System.out.println(resultNote);
+		}*/
+		
+	}
+	
+
+}

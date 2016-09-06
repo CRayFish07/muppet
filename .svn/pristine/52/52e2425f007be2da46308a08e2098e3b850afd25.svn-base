@@ -1,0 +1,13 @@
+package cn.bronzeware.muppet.listener;
+
+import java.util.Date;
+
+public class Listener1 implements Listener{
+
+	@Override
+	public void event(EventType type,Event event) {
+		System.out.println(new Date(System.currentTimeMillis()).toLocaleString());
+		
+	}
+
+}

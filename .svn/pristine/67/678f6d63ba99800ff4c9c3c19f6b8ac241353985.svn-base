@@ -1,0 +1,6 @@
+package cn.bronzeware.muppet.filters;
+
+public interface Filter {
+
+	public void doFilter(Chain chain);
+}

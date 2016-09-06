@@ -1,0 +1,8 @@
+package cn.bronzeware.muppet.test;
+
+public class A extends TestHashMap1{
+	public String a;
+}
+class B{
+	
+}

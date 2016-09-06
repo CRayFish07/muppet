@@ -1,0 +1,12 @@
+<muppet>
+<datasource>
+	<username></username>
+	<password></password>
+	<url></url>
+</datasource>
+
+<entity>
+<package name="cn.bronzeware.muppet.entities"/>
+</entity>
+
+</muppet>

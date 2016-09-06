@@ -1,0 +1,15 @@
+<muppet>
+<datasource>
+	<url value="jdbc:mysql://localhost:3306/muppet?Unicode=true"/>
+</datasource>
+
+<entity>
+<package name="cn.bronzeware.muppet.entities"/>
+</entity>
+
+<table tableName="tb_systems_books" domainObjectName="System_Book"></table>
+
+<generate packageName="cn.bronzeware.test1"></generate>
+
+
+</muppet>

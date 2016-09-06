@@ -1,0 +1,20 @@
+package cn.bronzeware.muppet.sqlgenerate;
+public class SqlGenerateException extends Exception{
+
+	private static final long serialVersionUID = -2272596789720418995L;
+	public static void main(String[] args) {
+
+	}
+	
+	private String message = null;
+	public SqlGenerateException(String message){
+		this.message = message;
+	}
+
+	@Override
+	public String getMessage() {
+		
+		return "Sql语句生成出错->"+message;
+	}
+
+}
